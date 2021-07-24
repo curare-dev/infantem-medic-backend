@@ -14,6 +14,18 @@ const typeDefs = gql`
     createdAt: String
   }
 
+  type Location {
+    id: ID
+    medicId: ID
+    street: String
+    number: Int
+    city: String
+    state: String
+    postalCode: Int
+    country: String
+    createdAt: String
+  }
+
   type Token {
     token: String
   }
@@ -29,6 +41,16 @@ const typeDefs = gql`
     numTel: String
   }
 
+  input LocationInput {
+    medicId: ID!
+    street: String!
+    number: Int!
+    city: String!
+    state: String!
+    postalCode: Int!
+    country: String!
+  }
+
   input AuthInput {
     email: String!
     password: String!
@@ -36,11 +58,14 @@ const typeDefs = gql`
 
   type Query {
     getMedic(token: String!): Medic
+    verifyToken(token: String!): Boolean
+    getLocation(id: ID!): Location
   }
 
   type Mutation {
     newMedic(input: MedicInput): Medic
     authMedic(input: AuthInput): Token
+    medicLocation(input: LocationInput): String
   }
 `;
 

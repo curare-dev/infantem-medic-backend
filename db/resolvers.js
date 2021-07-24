@@ -1,18 +1,31 @@
 const Medic = require("../models/Medics");
 const bcryptjs = require("bcryptjs");
 const jwt = require('jsonwebtoken');
+const MedicLocation = require("../models/MedicLocation");
 
 const createToken = ( medic, secret, expiresIn ) => {
-  const { id, email, nombre, apellido } = medic;
-  return jwt.sign( { id, email, nombre, apellido }, secret, { expiresIn } );
+  return jwt.sign( { id: medic.id }, secret, { expiresIn } );
 }
 
 // Resolvers
 const resolvers = {
   Query: {
     getMedic: async ( _, { token }) => {
-      const medicID = await jwt.verify( token, process.env.SECRET )
-      return medicID;
+      const { id } = await jwt.verify( token, process.env.SECRET );
+      const medic = await Medic.findById(id);
+      return medic;
+    },
+    getLocation: async ( _, { id }) => {
+      const medicLocation = await MedicLocation.findOne({ medicId: id });
+      return medicLocation;
+    },
+    verifyToken: async ( _, { token }) => {
+      try {
+        await jwt.verify( token ,process.env.SECRET );
+        return true;
+      } catch (error) {
+        return false;
+      }
     }
   },
   Mutation: {
@@ -27,7 +40,17 @@ const resolvers = {
         medic.save();
         return medic;
       } catch (error) {
-        console.log(error);
+        throw new Error(error);
+      }
+    },
+    medicLocation: async (_, { input }) => {
+      console.log( input );
+      try {
+        const medicLocation = new MedicLocation( input );
+        medicLocation.save();
+        return "Location saved correctly";
+      } catch (error) {
+        throw new Error(error);
       }
     },
     authMedic: async ( _, { input } ) => {
